@@ -2,28 +2,31 @@ from typing import Annotated, List
 
 from fastapi import Depends
 from openg2p_fastapi_auth.controllers.auth_controller import AuthController
+from openg2p_fastapi_auth.models.orm.login_provider import LoginProvider
 from openg2p_fastapi_common.errors.http_exceptions import UnauthorizedError
-from openg2p_portal_api_common.dependencies import JwtBearerAuth
-from openg2p_portal_api_common.models.credentials import AuthCredentials
-from openg2p_portal_api_common.models.orm.partner_orm import (
-    BankORM,
-    PartnerBankORM,
-    PartnerPhoneNoORM,
-)
-from openg2p_portal_api_common.models.orm.reg_id_orm import RegIDORM, RegIDTypeORM
-from openg2p_portal_api_common.models.profile import GetProfile, UpdateProfile
-from openg2p_portal_api_common.services.partner_service import PartnerService
 from sqlalchemy.exc import IntegrityError
 
 from ..config import Settings
+from openg2p_portal_api_common.dependencies import JwtBearerAuth
+from openg2p_portal_api_common.models.credentials import AuthCredentials
+from openg2p_portal_api_common.models.orm.auth_oauth_provider import AuthOauthProviderORM
+from openg2p_portal_api_common.models.orm.partner_orm import (
+    BankORM,
+    PartnerBankORM,
+    PartnerORM,
+    PartnerPhoneNoORM,
+)
 from ..models.orm.household_orm import HouseholdORM
+from openg2p_portal_api_common.models.orm.reg_id_orm import RegIDORM, RegIDTypeORM
+from openg2p_portal_api_common.models.profile import GetProfile, UpdateProfile
+from openg2p_portal_api_common.services.partner_service import PartnerService
 
 _config = Settings.get_config()
 
 
 class SR_AuthController(AuthController):
     """
-    SR_AuthController extends AuthController with additional routes and functions.
+    SR_AuthController extends AuthController with additional routes and functions.    
     """
 
     def __init__(self, **kwargs):

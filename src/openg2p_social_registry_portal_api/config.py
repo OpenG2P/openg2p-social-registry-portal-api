@@ -24,7 +24,7 @@ class Settings(AuthSettings, Settings):
 
     openapi_version: str = __version__
     db_dbname: Optional[str] = "openg2pdb"
-
+    
     # auth_api_get_programs: ApiAuthSettings = ApiAuthSettings(enabled=True)
     # auth_api_get_program_by_id: ApiAuthSettings = ApiAuthSettings(enabled=True)
     # auth_api_get_program_form: ApiAuthSettings = ApiAuthSettings(enabled=True)
@@ -36,8 +36,8 @@ class Settings(AuthSettings, Settings):
     # auth_api_get_program_summary: ApiAuthSettings = ApiAuthSettings(enabled=True)
     # auth_api_get_application_details: ApiAuthSettings = ApiAuthSettings(enabled=True)
     # auth_api_get_benefit_details: ApiAuthSettings = ApiAuthSettings(enabled=True)
-
+    
     # auth_api_get_household_members: ApiAuthSettings = ApiAuthSettings(enabled=True)
     # auth_api_update_household: ApiAuthSettings = ApiAuthSettings(enabled=True)
-    auth_api_get_group_by_partner_id: ApiAuthSettings = ApiAuthSettings(enabled=True)
-    auth_api_update_group_members: ApiAuthSettings = ApiAuthSettings(enabled=True)
+    auth_api_get_group_by_partner_id: ApiAuthSettings=ApiAuthSettings(enabled=True)
+    auth_api_update_group_members: ApiAuthSettings=ApiAuthSettings(enabled=True)

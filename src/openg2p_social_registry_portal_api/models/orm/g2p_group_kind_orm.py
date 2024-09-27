@@ -1,7 +1,7 @@
+from typing import Optional
 from openg2p_fastapi_common.models import BaseORMModel
-
 # from openg2p_portal_api_common.models.orm.partner_orm import PartnerORM
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class G2PGroupKindORM(BaseORMModel):

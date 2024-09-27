@@ -2,19 +2,18 @@ from typing import List, Optional
 
 from pydantic import BaseModel, ConfigDict
 
-
 class GroupMember(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     name: str
     email: str
     phone: str
-    birthdate: Optional[str] = None
-    gender: Optional[str] = None
-    company_id: int = 1
+    birthdate:  Optional[str] = None
+    gender:  Optional[str] = None
+    company_id: int=1
     # is_archieved: bool
     # ids: List[str] = []
-
+    
 
 class GroupDetail(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -27,8 +26,8 @@ class GroupDetail(BaseModel):
     address: str
     members: List[GroupMember]
 
-
 class GroupUpdate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     members: List[GroupMember]
     removed_members: List[int] = []  # Add a field for removed members
+
