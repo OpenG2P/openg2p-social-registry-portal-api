@@ -1,4 +1,4 @@
-# 
+#
 [![Pre-commit Status](https://github.com/OpenG2P/openg2p-social-registry-portal-api/actions/workflows/pre-commit.yml/badge.svg?branch=develop)](https://github.com/OpenG2P/openg2p-social-registry-portal-api/actions/workflows/pre-commit.yml?query=branch%3Adevelop)
 [![Build Status](https://github.com/OpenG2P/openg2p-social-registry-portal-api/actions/workflows/test.yml/badge.svg?branch=develop)](https://github.com/OpenG2P/openg2p-social-registry-portal-api/actions/workflows/test.yml?query=branch%3Adevelop)
 [![codecov](https://codecov.io/gh/OpenG2P/openg2p-social-registry-portal-api/branch/develop/graph/badge.svg)](https://codecov.io/gh/OpenG2P/openg2p-social-registry-portal-api)

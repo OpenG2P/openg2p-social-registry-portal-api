@@ -1,17 +1,23 @@
-from datetime import date, datetime
+from datetime import datetime
 
 from openg2p_fastapi_common.context import dbengine
 from openg2p_fastapi_common.service import BaseService
 from openg2p_portal_api_common.models.orm.partner_orm import PartnerORM
 from openg2p_portal_api_common.models.orm.reg_id_orm import RegIDORM
-from openg2p_social_registry_portal_api.models.orm.g2p_group_kind_orm import G2PGroupKindORM
 from sqlalchemy import and_, select
-from sqlalchemy.ext.asyncio import async_sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import async_sessionmaker
+
+from openg2p_social_registry_portal_api.models.orm.g2p_group_kind_orm import (
+    G2PGroupKindORM,
+)
 
 from ..models.group import GroupDetail, GroupMember, GroupUpdate
+from ..models.orm.g2p_group_membership_kind_link_orm import (
+    G2PGroupMembershipKindLinkORM,
+)
 from ..models.orm.g2p_group_membership_orm import G2PGroupMembershipORM
-from ..models.orm.g2p_group_membership_kind_link_orm import G2PGroupMembershipKindLinkORM
+
 # from ..models.orm.g2p_group_membership_kind_orm import G2PGroupMembershipKindORM
 
 
@@ -26,7 +32,7 @@ class GroupService(BaseService):
             partner = await session.get(PartnerORM, partner_id)
             if not partner:
                 return None
-            
+
             # Fetch all group memberships for the partner
             group_membership_results = await session.execute(
                 select(G2PGroupMembershipORM).where(
@@ -35,7 +41,7 @@ class GroupService(BaseService):
             )
             group_membership_records = group_membership_results.scalars().all()
 
-            groups = [] 
+            groups = []
             for group_membership in group_membership_records:
                 # Fetch group details for each membership
                 group_record = await session.get(PartnerORM, group_membership.group)
@@ -52,24 +58,23 @@ class GroupService(BaseService):
                         address=group_record.address,
                         members=[],
                     )
-                    group_detail.members = await self.get_group_members(group_record.id, session)
+                    group_detail.members = await self.get_group_members(
+                        group_record.id, session
+                    )
                     groups.append(group_detail)
 
             return groups  # Return a list of group details
-            
 
     async def get_group_members(self, group_id: int, session):
         group_members = []
         group_membership_records = await session.execute(
-            select(G2PGroupMembershipORM).where(
-                G2PGroupMembershipORM.group == group_id
-            )
+            select(G2PGroupMembershipORM).where(G2PGroupMembershipORM.group == group_id)
         )
         group_membership_records = group_membership_records.scalars().all()
         for membership in group_membership_records:
             individual_record = await session.get(PartnerORM, membership.individual)
             if individual_record:
-                member_kind = await self.get_membership_kind_names(membership.id, session)
+                await self.get_membership_kind_names(membership.id, session)
                 group_members.append(
                     GroupMember(
                         id=individual_record.id,
@@ -80,9 +85,9 @@ class GroupService(BaseService):
                         birthdate=individual_record.birthdate.isoformat()
                         if individual_record.birthdate
                         else None,
-                        gender=individual_record.gender 
+                        gender=individual_record.gender
                         if individual_record.gender
-                        else None
+                        else None,
                     )
                 )
         return group_members
@@ -93,7 +98,7 @@ class GroupService(BaseService):
             try:
                 group_record = await session.get(PartnerORM, group_id)
                 if not group_record:
-                    return {"message": f"Group with ID {group_id} not found."} 
+                    return {"message": f"Group with ID {group_id} not found."}
 
                 print(f"Group ID: {group_id}")
                 print(f"Group Update Members: {group_update.members}")
@@ -105,10 +110,10 @@ class GroupService(BaseService):
                     )
                 )
                 current_members = current_members.scalars().all()
-                
+
                 # Get updated member IDs
                 # updated_member_ids = [m.id for m in group_update.members]
-                
+
                 for member_id in group_update.removed_members:
                     membership_to_delete = await session.execute(
                         select(G2PGroupMembershipORM).where(
@@ -120,27 +125,33 @@ class GroupService(BaseService):
                     )
                     membership_to_delete = membership_to_delete.scalar_one_or_none()
                     if membership_to_delete:
-                        await session.delete(membership_to_delete)                
-                
+                        await session.delete(membership_to_delete)
+
                 # Add new members to the group
-                for member in group_update.members:  # Iterate through each member in the group_update
-                    member_id = member.id 
+                for (
+                    member
+                ) in (
+                    group_update.members
+                ):  # Iterate through each member in the group_update
+                    member_id = member.id
                     if not any(m.individual == member_id for m in current_members):
                         # Check if member already exists in the group
                         existing_partner = await session.get(PartnerORM, member_id)
                         if not existing_partner:
                             # Create a new partner record (using data from the member)
-                            birthdate_obj = datetime.strptime(member.birthdate, "%d/%m/%Y").date() 
+                            birthdate_obj = datetime.strptime(
+                                member.birthdate, "%d/%m/%Y"
+                            ).date()
                             new_partner = PartnerORM(
-                                name=member.name,  
-                                email=member.email,  
-                                phone=member.phone, 
+                                name=member.name,
+                                email=member.email,
+                                phone=member.phone,
                                 id=member.id,
-                                company_id=member.company_id,# Assuming you have a "family_name" field in GroupMember
+                                company_id=member.company_id,  # Assuming you have a "family_name" field in GroupMember
                                 birthdate=birthdate_obj,
                                 gender=member.gender,
-                                active=True
-                                )
+                                active=True,
+                            )
                             session.add(new_partner)
                             await session.commit()
 
@@ -150,12 +161,12 @@ class GroupService(BaseService):
                         )
                         session.add(group_membership)
 
-                await session.commit()  
+                await session.commit()
                 return "Group members updated successfully!"
             except SQLAlchemyError as e:
                 print(f"Error updating group members: {e}")
-                return {"message": "Error updating group members."} 
-                           
+                return {"message": "Error updating group members."}
+
     async def get_group_kind_name(self, kind_id, session):
         if kind_id:
             group_kind_record = await session.get(G2PGroupKindORM, kind_id)

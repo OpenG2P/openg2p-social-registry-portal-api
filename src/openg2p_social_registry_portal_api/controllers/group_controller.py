@@ -1,17 +1,14 @@
-import logging
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
-
+from fastapi import Depends
 from openg2p_fastapi_auth.controllers.auth_controller import AuthController
 from openg2p_fastapi_common.errors.http_exceptions import UnauthorizedError
-
-from ..config import Settings
 from openg2p_portal_api_common.dependencies import JwtBearerAuth
 from openg2p_portal_api_common.models.credentials import AuthCredentials
+
 from ..models.group import GroupDetail, GroupUpdate
 from ..services.group_services import GroupService
+
 
 # _logger = logging.getLogger(__name__)
 class GroupController(AuthController):
@@ -21,7 +18,7 @@ class GroupController(AuthController):
 
         # self.router = APIRouter(tags=["group"])
         # self._group_service = GroupService.get_component()  # Get group service
-        
+
         self.router.add_api_route(
             "/group/{partner_id}",
             self.get_group_by_partner_id,
