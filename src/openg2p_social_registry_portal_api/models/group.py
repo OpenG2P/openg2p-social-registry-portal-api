@@ -11,8 +11,6 @@ class GroupMember(BaseModel):
     birthdate:  Optional[str] = None
     gender:  Optional[str] = None
     company_id: int=1
-    # is_archieved: bool
-    # ids: List[str] = []
     
 
 class GroupDetail(BaseModel):

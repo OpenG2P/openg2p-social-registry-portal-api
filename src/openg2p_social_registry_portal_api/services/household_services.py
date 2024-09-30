@@ -2,12 +2,6 @@
 from sqlalchemy.ext.asyncio import async_sessionmaker
 from openg2p_portal_api_common.services.partner_service import PartnerService
 from sqlalchemy import (
-    Boolean,
-    Date,
-    DateTime,
-    ForeignKey,
-    String,
-    select,
     text,
 )
 from openg2p_portal_api_common.models.orm.partner_orm import PartnerORM  # Import the base class

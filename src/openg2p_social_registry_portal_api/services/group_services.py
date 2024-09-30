@@ -26,50 +26,37 @@ class GroupService(BaseService):
             partner = await session.get(PartnerORM, partner_id)
             if not partner:
                 return None
-
-            # Fetch the partner's group details
-            group_membership_result = await session.execute(
+            
+            # Fetch all group memberships for the partner
+            group_membership_results = await session.execute(
                 select(G2PGroupMembershipORM).where(
                     G2PGroupMembershipORM.individual == partner.id
                 )
             )
-            # print("&&&&&&&&&&&& In services Group Membership", group_membership_result)
+            group_membership_records = group_membership_results.scalars().all()
 
-            group_membership = group_membership_result.scalar_one_or_none()
-            if not group_membership:
-                return None
+            groups = [] 
+            for group_membership in group_membership_records:
+                # Fetch group details for each membership
+                group_record = await session.get(PartnerORM, group_membership.group)
+                if group_record:
+                    group_detail = GroupDetail(
+                        id=group_record.id,
+                        name=group_record.name,
+                        email=group_record.email,
+                        phone=group_record.phone,
+                        kind=await self.get_group_kind_name(group_record.kind, session),
+                        registration_date=group_record.registration_date.isoformat()
+                        if group_record.registration_date
+                        else None,
+                        address=group_record.address,
+                        members=[],
+                    )
+                    group_detail.members = await self.get_group_members(group_record.id, session)
+                    groups.append(group_detail)
+
+            return groups  # Return a list of group details
             
-
-            
-            group_record = await session.get(
-                PartnerORM, group_membership.group
-            )  # Fetch the group record
-            if not group_record:
-                return None
-            
-
-            # Create a GroupDetail object
-            group_detail = GroupDetail(
-                id=group_record.id,
-                name=group_record.name,
-                email=group_record.email,
-                phone=group_record.phone,
-                kind=await self.get_group_kind_name(
-                    group_record.kind, session
-                ),  # Fetch the group kind name
-                registration_date=group_record.registration_date.isoformat()
-                if group_record.registration_date
-                else None,
-                address=group_record.address,
-                members=[],
-            )
-
-            group_detail.members = await self.get_group_members(
-                group_record.id, session
-            )
-            print("************Group Detail", group_detail)
-
-            return group_detail
 
     async def get_group_members(self, group_id: int, session):
         group_members = []
@@ -120,14 +107,8 @@ class GroupService(BaseService):
                 current_members = current_members.scalars().all()
                 
                 # Get updated member IDs
-                updated_member_ids = [m.id for m in group_update.members]
+                # updated_member_ids = [m.id for m in group_update.members]
                 
-                # Remove existing members that are not in the updated list
-                # for member in current_members:
-                #     if member.individual not in updated_member_ids:
-                #         await session.delete(member)
-
-                 # Remove existing members that are explicitly marked for removal
                 for member_id in group_update.removed_members:
                     membership_to_delete = await session.execute(
                         select(G2PGroupMembershipORM).where(
@@ -157,7 +138,8 @@ class GroupService(BaseService):
                                 id=member.id,
                                 company_id=member.company_id,# Assuming you have a "family_name" field in GroupMember
                                 birthdate=birthdate_obj,
-                                gender=member.gender
+                                gender=member.gender,
+                                active=True
                                 )
                             session.add(new_partner)
                             await session.commit()

@@ -14,8 +14,6 @@ from ..models.group import GroupDetail, GroupUpdate
 from ..services.group_services import GroupService
 
 # _logger = logging.getLogger(__name__)
-_config = Settings.get_config()
-
 class GroupController(AuthController):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -41,23 +39,6 @@ class GroupController(AuthController):
         if not self._group_service:
             self._group_service = GroupService.get_component()
         return self._group_service
-
-    # def post_init(self):
-        self.router.add_api_route(
-            "/group/{partner_id}",
-            self.get_group_by_partner_id,
-            response_class=JSONResponse,
-            responses={200: {"model": GroupDetail}},
-            methods=["GET"],
-        )
-
-        self.router.add_api_route(
-            "/group/{group_id}",
-            self.update_group_members,
-            response_class=JSONResponse,
-            responses={200: {"model": str}},
-            methods=["PUT"],
-        )
 
     async def get_group_by_partner_id(
         self,
@@ -113,8 +94,5 @@ class GroupController(AuthController):
                 message="Unauthorized. Partner Not Found in Registry."
             )
         await self.group_service.update_group_members(group_id, group_update)
-        # print("********* group_id==>:", group_id)
-        # print("********* group_update==>", group_update)
-        # print("6666666666666 group CONTROLLER self.group_service.update_group_members ==>", self.group_service.update_group_members(group_id, group_update))
 
         return "Group members updated successfully!"

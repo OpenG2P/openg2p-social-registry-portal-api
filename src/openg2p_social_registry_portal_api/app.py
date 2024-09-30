@@ -8,10 +8,8 @@ _config = Settings.get_config()
 from openg2p_fastapi_common.app import Initializer
 from openg2p_portal_api_common.controllers.auth_controller import AuthController
 from openg2p_portal_api_common.controllers.oauth_controller import OAuthController
-from openg2p_social_registry_portal_api.controllers.auth_controller import SR_AuthController
 from openg2p_social_registry_portal_api.controllers.group_controller import GroupController
 from openg2p_portal_api_common.services.partner_service import PartnerService
-from .services.household_services import SocialRegistryPartnerService
 from openg2p_portal_api_common.services.membership_service import MembershipService
 from openg2p_portal_api_common.models.orm.program_registrant_info_orm import ProgramRegistrantInfoDraftORM
 from .services.group_services import GroupService
@@ -22,17 +20,10 @@ class Initializer(Initializer):
         # Initialize all Services, Controllers, any utils here.
         PartnerService()
         MembershipService()
-        # SocialRegistryPartnerService()
-        # ProgramService()
-        # FormService()
         GroupService()
 
-        # DiscoveryController().post_init()
-        # ProgramController().post_init()
-        # FormController().post_init()
         AuthController().post_init()
         OAuthController().post_init()
-        # SR_AuthController().post_init()
         GroupController().post_init()
 
     def migrate_database(self, args):
